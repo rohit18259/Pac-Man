@@ -25,12 +25,27 @@ class Graph:
 class Player:
 	def __init__(self,position):
 		self.position = position
+		self.points = 0
+		self.image = pygame.image.load("pac-man-sprites/r0.png")
+		self.rimageList = [pygame.image.load("pac-man-sprites/r0.png"),pygame.image.load("pac-man-sprites/r1.png"),pygame.image.load("pac-man-sprites/r2.png"),pygame.image.load("pac-man-sprites/r3.png"),pygame.image.load("pac-man-sprites/r4.png")]
+		self.limageList = [pygame.image.load("pac-man-sprites/l0.png"),pygame.image.load("pac-man-sprites/l1.png"),pygame.image.load("pac-man-sprites/l2.png"),pygame.image.load("pac-man-sprites/l3.png"),pygame.image.load("pac-man-sprites/l4.png")]
+		self.uimageList = [pygame.image.load("pac-man-sprites/u0.png"),pygame.image.load("pac-man-sprites/u1.png"),pygame.image.load("pac-man-sprites/u2.png"),pygame.image.load("pac-man-sprites/u3.png"),pygame.image.load("pac-man-sprites/u4.png")]
+		self.dimageList = [pygame.image.load("pac-man-sprites/d0.png"),pygame.image.load("pac-man-sprites/d1.png"),pygame.image.load("pac-man-sprites/d2.png"),pygame.image.load("pac-man-sprites/d3.png"),pygame.image.load("pac-man-sprites/d4.png")]
+		self.rcount = 0
+		self.lcount = 0
+		self.ucount = 0
+		self.dcount = 0
+		self.ri = 0
+		self.li = 0
+		self.ui = 0
+		self.di = 0
 
 	def setGraph(self,graph):
 		self.graph = graph
 
 	def display(self,win):
-		pygame.draw.circle(win,(255,255,0),self.position,17)
+		#pygame.draw.circle(win,(255,255,0),self.position,17)
+		win.blit(self.image,(self.position[0]-20,self.position[1]-20))
 
 	def pathDisplay(self,win):
 		pos1 = self.position
@@ -61,6 +76,19 @@ class Player:
 			if inLine(v1,v2,pos1):
 				val = True
 		if val:
+			if x>0:
+				self.rcount += 1
+				if self.rcount > 10:
+					self.ri = (self.ri+1)%5
+					self.image = self.rimageList[self.ri]
+					self.rcount = 0
+
+			else:
+				self.lcount += 1
+				if self.lcount > 10:
+					self.li = (self.li+1)%5
+					self.image = self.limageList[self.li]
+					self.lcount = 0
 			self.position = pos1
 
 	def translatey(self,y):
@@ -73,24 +101,19 @@ class Player:
 			if inLine(v1,v2,pos1):
 				val = True
 		if val:
+			if y>0:
+				self.dcount += 1
+				if self.dcount > 10:
+					self.di = (self.di+1)%5
+					self.image = self.dimageList[self.di]
+					self.dcount = 0
+			else:
+				self.ucount += 1
+				if self.ucount > 10:
+					self.ui = (self.ui+1)%5
+					self.image = self.uimageList[self.ui]
+					self.ucount = 0
 			self.position = pos1
-
-
-pygame.init()
-
-image = pygame.image.load("maze1.png")
-
-display = (600,600)
-
-win = pygame.display.set_mode(display)
-pygame.display.set_caption("PAC-MAN")
-
-#graph = Graph(vertices=[[100,400],[300,400],[300,250],[450,250],[450,400]],edges=[[0,1],[1,2],[1,4],[2,3],[3,4]])
-#player = Player([100,400])
-
-graph = Graph(vertices=[[20,300],[60,300],[60,220],[100,220],[140,220],[140,300],[140,380],[100,380],[60,380],[100,460],[140,460],[140,500],[140,540],[60,540],[60,460],[100,140],[60,140],[60,60],[140,60],[140,100],[140,140],[220,140],[220,100],[220,60],[300,60],[380,60],[380,100],[380,140],[300,140],[460,100],[460,60],[540,60],[540,140],[500,140],[460,140],[500,220],[540,220],[540,300],[540,380],[500,380],[460,380],[460,300],[460,220],[500,460],[540,460],[540,540],[460,540],[460,500],[460,460],[380,500],[380,540],[300,540],[220,540],[220,500],[220,460],[300,460],[380,460],[220,380],[220,300],[220,220],[300,220],[380,220],[380,300],[380,380],[300,380],[300,300],[300,20],[580,300],[300,580]],edges=[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[8,1],[7,9],[9,10],[10,11],[11,12],[12,13],[13,14],[14,9],[3,15],[15,16],[16,17],[17,18],[18,19],[19,20],[20,15],[19,22],[22,23],[23,24],[24,25],[25,26],[26,27],[27,28],[28,21],[21,22],[26,29],[29,30],[30,31],[31,32],[32,33],[33,34],[34,29],[33,35],[35,36],[36,37],[37,38],[38,39],[39,40],[40,41],[41,42],[42,35],[39,43],[43,44],[44,45],[45,46],[46,47],[47,48],[48,43],[47,49],[49,50],[50,51],[51,52],[52,53],[53,54],[54,55],[55,56],[56,49],[53,11],[28,60],[41,62],[55,64],[5,58],[59,60],[60,61],[61,62],[62,63],[63,64],[64,57],[57,58],[58,59],[58,65],[60,65],[62,65],[64,65],[24,66],[37,67],[51,68]])
-player = Player([20,300])
-player.setGraph(graph)
 
 class Vertex:
 	def __init__(self,v,dist):
@@ -137,21 +160,6 @@ def shortestPathTree(vindex,graph):
 		S.add(minw)
 		spt.add(tuple(minedge))
 	return spt
-
-dmap = {}
-for i in range(len(graph.vertices)):
-	spt = list(shortestPathTree(i,graph))
-	d = {}
-	for j in range(len(graph.vertices)):
-		d[j] = []
-	for edge in spt:
-		v1 = edge[0]
-		v2 = edge[1]
-		if v2 not in d[v1]:
-			d[v1].append(v2)
-		if v1 not in d[v2]:
-			d[v2].append(v1)
-	dmap[i] = d
 
 class Enemy:
 	def __init__(self,curindex,graph,player,dmap):
@@ -230,7 +238,73 @@ def func(parent,child,pindex,d):
 				return True
 	return False
 
+
+class MushRooms:
+	def __init__(self,file):
+		self.mushset = set()
+		self.initiate(file)
+		self.number = len(self.mushset)
+
+	def initiate(self,file):
+		s = file.read()
+		l = s.split("\n")
+		for j in range(len(l)):
+			for i in range(len(l[j])):
+				if l[j][i]=="." :
+					x,y = (60+i*40,60+j*40)
+					self.mushset.add((x,y))
+		file.close()
+
+	def display(self,win):
+		for i in self.mushset:
+			pygame.draw.circle(win,(255,255,255),i,5)
+
+	def update(self,player):
+		ptopleftx, ptoplefty = player.position[0]-20, player.position[1]-20
+		pbottomrightx , pbottomrighty = player.position[0]+20, player.position[1]+20
+		temp = []
+		for x,y in self.mushset:
+			if ptopleftx<=x<=pbottomrightx and ptoplefty<=y<=pbottomrighty:
+				temp.append((x,y))
+		for x,y in temp:
+			self.mushset.remove((x,y))
+			self.number -= 1
+			player.points += 1
+
+
+pygame.init()
+
+image = pygame.image.load("maze1.png")
+
+display = (600,600)
+
+win = pygame.display.set_mode(display)
+pygame.display.set_caption("PAC-MAN")
+
+#graph = Graph(vertices=[[100,400],[300,400],[300,250],[450,250],[450,400]],edges=[[0,1],[1,2],[1,4],[2,3],[3,4]])
+#player = Player([100,400])
+
+graph = Graph(vertices=[[20,300],[60,300],[60,220],[100,220],[140,220],[140,300],[140,380],[100,380],[60,380],[100,460],[140,460],[140,500],[140,540],[60,540],[60,460],[100,140],[60,140],[60,60],[140,60],[140,100],[140,140],[220,140],[220,100],[220,60],[300,60],[380,60],[380,100],[380,140],[300,140],[460,100],[460,60],[540,60],[540,140],[500,140],[460,140],[500,220],[540,220],[540,300],[540,380],[500,380],[460,380],[460,300],[460,220],[500,460],[540,460],[540,540],[460,540],[460,500],[460,460],[380,500],[380,540],[300,540],[220,540],[220,500],[220,460],[300,460],[380,460],[220,380],[220,300],[220,220],[300,220],[380,220],[380,300],[380,380],[300,380],[300,300],[300,20],[580,300],[300,580]],edges=[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[8,1],[7,9],[9,10],[10,11],[11,12],[12,13],[13,14],[14,9],[3,15],[15,16],[16,17],[17,18],[18,19],[19,20],[20,15],[19,22],[22,23],[23,24],[24,25],[25,26],[26,27],[27,28],[28,21],[21,22],[26,29],[29,30],[30,31],[31,32],[32,33],[33,34],[34,29],[33,35],[35,36],[36,37],[37,38],[38,39],[39,40],[40,41],[41,42],[42,35],[39,43],[43,44],[44,45],[45,46],[46,47],[47,48],[48,43],[47,49],[49,50],[50,51],[51,52],[52,53],[53,54],[54,55],[55,56],[56,49],[53,11],[28,60],[41,62],[55,64],[5,58],[59,60],[60,61],[61,62],[62,63],[63,64],[64,57],[57,58],[58,59],[58,65],[60,65],[62,65],[64,65],[24,66],[37,67],[51,68]])
+player = Player([20,300])
+player.setGraph(graph)
+
+dmap = {}
+for i in range(len(graph.vertices)):
+	spt = list(shortestPathTree(i,graph))
+	d = {}
+	for j in range(len(graph.vertices)):
+		d[j] = []
+	for edge in spt:
+		v1 = edge[0]
+		v2 = edge[1]
+		if v2 not in d[v1]:
+			d[v1].append(v2)
+		if v1 not in d[v2]:
+			d[v2].append(v1)
+	dmap[i] = d
+
 enemy = Enemy(67,graph,player,dmap)
+mushrooms = MushRooms(open("mush.txt","r"))
 
 run = True
 pathbool = False
@@ -253,14 +327,20 @@ while run:
 		pathbool = False
 	if keys[pygame.K_y]:
 		pathbool = True
+	if keys[pygame.K_p]:
+		print(player.points)
 
 	win.blit(image,(0,0))
 	#graph.display(win)
+	mushrooms.display(win)
+	mushrooms.update(player)
 	player.display(win)
 	enemy.display(win)
 	enemy.run()
+	'''
 	if pathbool:
 		player.pathDisplay(win)
+	'''
 	pygame.display.update()
 
 pygame.quit()
