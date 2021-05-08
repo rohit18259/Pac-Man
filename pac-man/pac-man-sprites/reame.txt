@@ -1,1 +1,2 @@
 
+These image files in the folder pac-man-sprites are used as images in the game for animation. DO NOT DELETE THEM, or else the game would not run.
