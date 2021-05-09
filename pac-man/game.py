@@ -44,7 +44,6 @@ class Player:
 		self.graph = graph
 
 	def display(self,win):
-		#pygame.draw.circle(win,(255,255,0),self.position,17)
 		win.blit(self.image,(self.position[0]-20,self.position[1]-20))
 
 	def pathDisplay(self,win):
@@ -213,7 +212,7 @@ class Enemy:
 					pindex = edge[1]
 
 		parent = self.curindex
-		d = dmap[self.curindex]
+		d = self.dmap[self.curindex]
 		for child in d[self.curindex]:
 			if func(parent,child,pindex,d):
 				self.nexindex = child
@@ -221,6 +220,11 @@ class Enemy:
 				self.curpos = self.graph.vertices[self.curindex].copy()
 				self.nexpos = self.graph.vertices[self.nexindex].copy()
 				break
+
+	def catchPlayer(self):
+		if length(self.curpos,self.player.position) <= 20:
+			return True
+		return False
 
 def func(parent,child,pindex,d):
 	if child == pindex:
@@ -271,76 +275,182 @@ class MushRooms:
 			self.number -= 1
 			player.points += 1
 
+class Button:
+	def __init__(self,text,textsize,fg,bg,center):
+		self.text = text
+		self.textsize = textsize
+		self.fg = fg
+		self.bg = bg
+		self.center = center
+		self.font = pygame.font.Font('freesansbold.ttf',32)
+		self.textObject = self.font.render(text,True,fg,bg)
+		self.rectObject = self.textObject.get_rect()
+		self.rectObject.center = center
+
+	def onClick(self):
+		x,y = pygame.mouse.get_pos()
+		if self.rectObject.collidepoint((x,y)):
+			return True
+		return False
+
+	def display(self,win):
+		win.blit(self.textObject,self.rectObject)
+
+def loseMenu(win,player):
+	backbutton = Button("     Back     ",32, (0,255,0), (0,0,255), (50,500))
+	font = pygame.font.Font('freesansbold.ttf',32)
+	text1 = font.render("   YOU LOSE !   ",True,(255,0,0),(255,255,0))
+	textrect1 = text1.get_rect()
+	textrect1.center = (300,300)
+
+	text2 = font.render(" YOUR SCORE :- "+str(player.points),True,(255,0,0),(255,255,0))
+	textrect2 = text2.get_rect()
+	textrect2.center = (300,350)
+
+	run = True
+	while run:
+		win.fill((0,0,0))
+		win.blit(text1,textrect1)
+		win.blit(text2,textrect2)
+		backbutton.display(win)
+
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				pygame.quit()
+			if event.type == pygame.MOUSEBUTTONDOWN:
+				if backbutton.onClick():
+					run = False
+
+		pygame.display.update()
+
+
+def winMenu(win,player):
+	print("chalega")
+	backbutton = Button("     Back     ",32, (0,255,0), (0,0,255), (50,500))
+	font = pygame.font.Font('freesansbold.ttf',32)
+	text = font.render("   YOU WIN !   ",True,(255,0,0),(255,255,0))
+	textrect = text.get_rect()
+	textrect.center = (300,300)
+
+	run = True
+	while run:
+		win.fill((0,0,0))
+		win.blit(text,textrect)
+		backbutton.display(win)
+
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				pygame.quit()
+			if event.type == pygame.MOUSEBUTTONDOWN:
+				if backbutton.onClick():
+					run = False
+
+		pygame.display.update()
+
+
+
+def gamePlay(win):
+	image = pygame.image.load("maze1.png")
+	graph = Graph(vertices=[[20,300],[60,300],[60,220],[100,220],[140,220],[140,300],[140,380],[100,380],[60,380],[100,460],[140,460],[140,500],[140,540],[60,540],[60,460],[100,140],[60,140],[60,60],[140,60],[140,100],[140,140],[220,140],[220,100],[220,60],[300,60],[380,60],[380,100],[380,140],[300,140],[460,100],[460,60],[540,60],[540,140],[500,140],[460,140],[500,220],[540,220],[540,300],[540,380],[500,380],[460,380],[460,300],[460,220],[500,460],[540,460],[540,540],[460,540],[460,500],[460,460],[380,500],[380,540],[300,540],[220,540],[220,500],[220,460],[300,460],[380,460],[220,380],[220,300],[220,220],[300,220],[380,220],[380,300],[380,380],[300,380],[300,300],[300,20],[580,300],[300,580]],edges=[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[8,1],[7,9],[9,10],[10,11],[11,12],[12,13],[13,14],[14,9],[3,15],[15,16],[16,17],[17,18],[18,19],[19,20],[20,15],[19,22],[22,23],[23,24],[24,25],[25,26],[26,27],[27,28],[28,21],[21,22],[26,29],[29,30],[30,31],[31,32],[32,33],[33,34],[34,29],[33,35],[35,36],[36,37],[37,38],[38,39],[39,40],[40,41],[41,42],[42,35],[39,43],[43,44],[44,45],[45,46],[46,47],[47,48],[48,43],[47,49],[49,50],[50,51],[51,52],[52,53],[53,54],[54,55],[55,56],[56,49],[53,11],[28,60],[41,62],[55,64],[5,58],[59,60],[60,61],[61,62],[62,63],[63,64],[64,57],[57,58],[58,59],[58,65],[60,65],[62,65],[64,65],[24,66],[37,67],[51,68]])
+	player = Player([20,300])
+	player.setGraph(graph)
+
+	dmap = {}
+	for i in range(len(graph.vertices)):
+		spt = list(shortestPathTree(i,graph))
+		d = {}
+		for j in range(len(graph.vertices)):
+			d[j] = []
+		for edge in spt:
+			v1 = edge[0]
+			v2 = edge[1]
+			if v2 not in d[v1]:
+				d[v1].append(v2)
+			if v1 not in d[v2]:
+				d[v2].append(v1)
+		dmap[i] = d
+
+	enemy = Enemy(67,graph,player,dmap)
+	mushrooms = MushRooms(open("mush.txt","r"))
+
+	winbool = True
+
+	run = True
+	pathbool = False
+	while run:
+		pygame.time.delay(6)
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				pygame.quit()
+
+		keys = pygame.key.get_pressed()
+		if keys[pygame.K_a]:
+			player.translatex(-1)
+		if keys[pygame.K_d]:
+			player.translatex(1)
+		if keys[pygame.K_w]:
+			player.translatey(-1)
+		if keys[pygame.K_s]:
+			player.translatey(1)
+		if keys[pygame.K_n]:
+			pathbool = False
+		if keys[pygame.K_y]:
+			pathbool = True
+		if keys[pygame.K_p]:
+			print(player.points)
+
+		win.blit(image,(0,0))
+		mushrooms.display(win)
+		mushrooms.update(player)
+		player.display(win)
+		enemy.display(win)
+		enemy.run()
+
+		if enemy.catchPlayer():
+			run = False
+			winbool = False
+
+		elif player.points == 113:
+			run = False
+			winbool = True
+
+		pygame.display.update()
+
+	if winbool == False:
+		loseMenu(win,player)
+	elif winbool == True:
+		winMenu(win,player)
+
+
+def mainMenu(win):
+	playbutton = Button("     Play     ",32,(0,255,0), (0,0,255), (300,250))
+	helpbutton = Button("     Help     ",32,(0,255,0), (0,0,255), (300,300))
+	quitbutton = Button("     Quit     ",32,(0,255,0), (0,0,255), (300,350))
+
+	run = True
+	while run:
+		win.fill((0,0,0))
+		playbutton.display(win)
+		helpbutton.display(win)
+		quitbutton.display(win)
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				pygame.quit()
+			if event.type == pygame.MOUSEBUTTONDOWN:
+				if playbutton.onClick():
+					gamePlay(win)
+				if helpbutton.onClick():
+					print("help in progress!")
+				if quitbutton.onClick():
+					run = False
+
+		pygame.display.update()
+
+
 
 pygame.init()
-
-image = pygame.image.load("maze1.png")
-
 display = (600,600)
 
 win = pygame.display.set_mode(display)
 pygame.display.set_caption("PAC-MAN")
-
-#graph = Graph(vertices=[[100,400],[300,400],[300,250],[450,250],[450,400]],edges=[[0,1],[1,2],[1,4],[2,3],[3,4]])
-#player = Player([100,400])
-
-graph = Graph(vertices=[[20,300],[60,300],[60,220],[100,220],[140,220],[140,300],[140,380],[100,380],[60,380],[100,460],[140,460],[140,500],[140,540],[60,540],[60,460],[100,140],[60,140],[60,60],[140,60],[140,100],[140,140],[220,140],[220,100],[220,60],[300,60],[380,60],[380,100],[380,140],[300,140],[460,100],[460,60],[540,60],[540,140],[500,140],[460,140],[500,220],[540,220],[540,300],[540,380],[500,380],[460,380],[460,300],[460,220],[500,460],[540,460],[540,540],[460,540],[460,500],[460,460],[380,500],[380,540],[300,540],[220,540],[220,500],[220,460],[300,460],[380,460],[220,380],[220,300],[220,220],[300,220],[380,220],[380,300],[380,380],[300,380],[300,300],[300,20],[580,300],[300,580]],edges=[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[8,1],[7,9],[9,10],[10,11],[11,12],[12,13],[13,14],[14,9],[3,15],[15,16],[16,17],[17,18],[18,19],[19,20],[20,15],[19,22],[22,23],[23,24],[24,25],[25,26],[26,27],[27,28],[28,21],[21,22],[26,29],[29,30],[30,31],[31,32],[32,33],[33,34],[34,29],[33,35],[35,36],[36,37],[37,38],[38,39],[39,40],[40,41],[41,42],[42,35],[39,43],[43,44],[44,45],[45,46],[46,47],[47,48],[48,43],[47,49],[49,50],[50,51],[51,52],[52,53],[53,54],[54,55],[55,56],[56,49],[53,11],[28,60],[41,62],[55,64],[5,58],[59,60],[60,61],[61,62],[62,63],[63,64],[64,57],[57,58],[58,59],[58,65],[60,65],[62,65],[64,65],[24,66],[37,67],[51,68]])
-player = Player([20,300])
-player.setGraph(graph)
-
-dmap = {}
-for i in range(len(graph.vertices)):
-	spt = list(shortestPathTree(i,graph))
-	d = {}
-	for j in range(len(graph.vertices)):
-		d[j] = []
-	for edge in spt:
-		v1 = edge[0]
-		v2 = edge[1]
-		if v2 not in d[v1]:
-			d[v1].append(v2)
-		if v1 not in d[v2]:
-			d[v2].append(v1)
-	dmap[i] = d
-
-enemy = Enemy(67,graph,player,dmap)
-mushrooms = MushRooms(open("mush.txt","r"))
-
-run = True
-pathbool = False
-while run:
-	pygame.time.delay(5)
-	for event in pygame.event.get():
-		if event.type == pygame.QUIT:
-			run = False
-
-	keys = pygame.key.get_pressed()
-	if keys[pygame.K_a]:
-		player.translatex(-1)
-	if keys[pygame.K_d]:
-		player.translatex(1)
-	if keys[pygame.K_w]:
-		player.translatey(-1)
-	if keys[pygame.K_s]:
-		player.translatey(1)
-	if keys[pygame.K_n]:
-		pathbool = False
-	if keys[pygame.K_y]:
-		pathbool = True
-	if keys[pygame.K_p]:
-		print(player.points)
-
-	win.blit(image,(0,0))
-	#graph.display(win)
-	mushrooms.display(win)
-	mushrooms.update(player)
-	player.display(win)
-	enemy.display(win)
-	enemy.run()
-	'''
-	if pathbool:
-		player.pathDisplay(win)
-	'''
-	pygame.display.update()
-
-pygame.quit()
+mainMenu(win)
