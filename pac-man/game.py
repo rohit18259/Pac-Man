@@ -325,7 +325,6 @@ def loseMenu(win,player):
 
 
 def winMenu(win,player):
-	print("chalega")
 	backbutton = Button("     Back     ",32, (0,255,0), (0,0,255), (50,500))
 	font = pygame.font.Font('freesansbold.ttf',32)
 	text = font.render("   YOU WIN !   ",True,(255,0,0),(255,255,0))
