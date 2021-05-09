@@ -22,7 +22,7 @@ class Graph:
 			pygame.draw.circle(win,(255,0,0),v1,10)
 			pygame.draw.circle(win,(255,0,0),v2,10)
 
-class Player: 
+class Player:
 	def __init__(self,position):
 		self.position = position
 		self.points = 0
