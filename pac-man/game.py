@@ -323,6 +323,37 @@ def loseMenu(win,player):
 
 		pygame.display.update()
 
+def helpMenu(win):
+	backbutton = Button("     Back     ",32, (0,255,0), (0,0,255), (50,500))
+	font = pygame.font.Font('freesansbold.ttf',32)
+
+	text1 = font.render("Move using w-a-s-d keys. Avoid",True,(255,0,0),(255,255,0))
+	text2 = font.render("touching the enemy. Eat all the",True,(255,0,0),(255,255,0))
+	text3 = font.render("mushrooms in the maze to win!", True,(255,0,0),(255,255,0))
+	textrect1 = text1.get_rect()
+	textrect2 = text2.get_rect()
+	textrect3 = text3.get_rect()
+	textrect1.center = (300,200)
+	textrect2.center = (300,250)
+	textrect3.center = (300,300)
+
+	run = True
+	while run:
+		win.fill((0,0,0))
+		win.blit(text1,textrect1)
+		win.blit(text2,textrect2)
+		win.blit(text3,textrect3)
+		backbutton.display(win)
+
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				pygame.quit()
+			if event.type == pygame.MOUSEBUTTONDOWN:
+				if backbutton.onClick():
+					run = False
+
+		pygame.display.update()
+
 
 def winMenu(win,player):
 	backbutton = Button("     Back     ",32, (0,255,0), (0,0,255), (50,500))
@@ -439,7 +470,7 @@ def mainMenu(win):
 				if playbutton.onClick():
 					gamePlay(win)
 				if helpbutton.onClick():
-					print("help in progress!")
+					helpMenu(win)
 				if quitbutton.onClick():
 					run = False
 
