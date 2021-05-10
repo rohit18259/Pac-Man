@@ -177,19 +177,32 @@ class Enemy:
 	def translate(self):
 		cur = self.curpos
 		nex = self.nexpos
+		velocity = 0.9
 		if cur[0] == nex[0] and cur[1] == nex[1]:
 			self.boolfind = True
 			self.curindex = self.nexindex
 		elif cur[1] == nex[1]:
 			if nex[0] > cur[0]:
-				cur[0] = cur[0] + 1
+				if (cur[0] + velocity > nex[0]):
+					cur[0] = nex[0]
+				else:
+					cur[0] = cur[0] + velocity
 			else:
-				cur[0] = cur[0] - 1
+				if (cur[0] - velocity < nex[0]):
+					cur[0] = nex[0]
+				else:
+					cur[0] = cur[0] - velocity
 		elif cur[0] == nex[0]:
 			if nex[1] > cur[1]:
-				cur[1] = cur[1] + 1
+				if (cur[1] + velocity > nex[1]):
+					cur[1] = nex[1]
+				else:
+					cur[1] = cur[1] + velocity
 			else:
-				cur[1] = cur[1] - 1
+				if (cur[1] - velocity < nex[1]):
+					cur[1] = nex[1]
+				else:
+					cur[1] = cur[1] - velocity
 
 
 	def run(self):
@@ -408,7 +421,7 @@ def gamePlay(win):
 	run = True
 	pathbool = False
 	while run:
-		pygame.time.delay(6)
+		pygame.time.delay(5)
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				pygame.quit()
