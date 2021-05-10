@@ -161,7 +161,7 @@ def shortestPathTree(vindex,graph):
 	return spt
 
 class Enemy:
-	def __init__(self,curindex,graph,player,dmap):
+	def __init__(self,curindex,graph,player,velocity,dmap):
 		self.graph = graph
 		self.player = player
 		self.dmap = dmap
@@ -170,6 +170,7 @@ class Enemy:
 		self.nexindex = 0
 		self.boolfind = True
 		self.image = pygame.image.load("enemy3.png")
+		self.velocity = velocity
 
 	def display(self,win):
 		win.blit(self.image,(self.curpos[0]-20,self.curpos[1]-20))
@@ -177,7 +178,7 @@ class Enemy:
 	def translate(self):
 		cur = self.curpos
 		nex = self.nexpos
-		velocity = 0.9
+		velocity = self.velocity
 		if cur[0] == nex[0] and cur[1] == nex[1]:
 			self.boolfind = True
 			self.curindex = self.nexindex
@@ -413,7 +414,7 @@ def gamePlay(win):
 				d[v2].append(v1)
 		dmap[i] = d
 
-	enemy = Enemy(67,graph,player,dmap)
+	enemy = Enemy(67,graph,player,0.8,dmap)
 	mushrooms = MushRooms(open("mush.txt","r"))
 
 	winbool = True
